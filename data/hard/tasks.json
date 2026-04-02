@@ -1,0 +1,129 @@
+[
+  {
+    "task_id": "hard_001",
+    "difficulty": "hard",
+    "instruction": "Read the following eight paper abstracts, all related to the broad topic of scaling and efficiency in large language models. Synthesize a structured literature review as a JSON object with these keys: overview (a paragraph summarizing the research landscape), themes (a list of recurring research themes across the papers), evidence_points (a list of specific empirical findings or claims from the papers, each referencing the relevant paper_id), contradictions (a list of any contradictory findings or tensions between papers), limitations (a list of shared or notable limitations), research_gaps (a list of underexplored areas or open questions identified from the corpus), and future_directions (a list of promising future research directions grounded in the papers). Every claim must be grounded in the provided abstracts. Do not hallucinate information not present in the abstracts.",
+    "max_steps": 8,
+    "papers": [
+      {
+        "paper_id": "P010",
+        "title": "Scaling Laws for Neural Language Models",
+        "authors": ["Jared Kaplan", "Sam McCandlish", "Tom Henighan", "Tom B. Brown", "Benjamin Chess", "Rewon Child", "Scott Gray", "Alec Radford", "Jeffrey Wu", "Dario Amodei"],
+        "year": 2020,
+        "venue": "arXiv",
+        "abstract": "We study empirical scaling laws for language model performance on the cross-entropy loss. The loss scales as a power-law with model size, dataset size, and the amount of compute used for training, with some trends spanning more than seven orders of magnitude. Other architectural details such as network width or depth have minimal effects within a wide range. Simple equations govern the dependence of overfitting on model/dataset size and the dependence of training speed on model size. These relationships allow us to determine the optimal allocation of a fixed compute budget. Larger models are significantly more sample-efficient, so that optimally compute-efficient training involves training very large models on a relatively modest amount of data and stopping significantly before convergence.",
+        "domain": "Machine Learning"
+      },
+      {
+        "paper_id": "P011",
+        "title": "Training Compute-Optimal Large Language Models (Chinchilla)",
+        "authors": ["Jordan Hoffmann", "Sebastian Borgeaud", "Arthur Mensch", "Elena Buchatskaya", "Trevor Cai", "Eliza Rutherford", "Diego de Las Casas", "Lisa Anne Hendricks", "Johannes Welbl", "Aidan Clark", "Tom Hennigan", "Eric Noland", "Katie Millican", "George van den Driessche", "Bogdan Damoc", "Aurelia Guy", "Simon Osindero", "Karen Simonyan", "Erich Elsen", "Jack W. Rae", "Oriol Vinyals", "Laurent Sifre"],
+        "year": 2022,
+        "venue": "NeurIPS",
+        "abstract": "We investigate the optimal model size and number of tokens for training a transformer language model under a given compute budget. We find that current large language models are significantly over-parameterized and under-trained. Given the approach of scaling models while keeping the amount of training data constant, we instead find that for compute-optimal training, the model size and the number of training tokens should be scaled equally: for every doubling of model size, the number of training tokens should also be doubled. We test this hypothesis by training a predicted compute-optimal model, Chinchilla, that uses the same compute budget as Gopher (280B) but has 70B parameters and is trained on 4x more data. Chinchilla uniformly and significantly outperforms Gopher (280B), GPT-3 (175B), Jurassic-1 (178B), and Megatron-Turing NLG (530B) on a large range of downstream evaluation tasks.",
+        "domain": "Machine Learning"
+      },
+      {
+        "paper_id": "P012",
+        "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+        "authors": ["Edward J. Hu", "Yelong Shen", "Phillip Wallis", "Zeyuan Allen-Zhu", "Yuanzhi Li", "Shean Wang", "Lu Wang", "Weizhu Chen"],
+        "year": 2022,
+        "venue": "ICLR",
+        "abstract": "An important paradigm of natural language processing consists of large-scale pre-training on general domain data and adaptation to particular tasks or domains. As we pre-train larger models, full fine-tuning, which retrains all model parameters, becomes less feasible. Using GPT-3 175B as an example -- deploying independent instances of fine-tuned models, each with 175B parameters, is prohibitively expensive. We propose Low-Rank Adaptation, or LoRA, which freezes the pre-trained model weights and injects trainable rank decomposition matrices into each layer of the Transformer architecture, greatly reducing the number of trainable parameters for downstream tasks. Compared to GPT-3 175B fine-tuned with Adam, LoRA can reduce the number of trainable parameters by 10,000 times and the GPU memory requirement by 3 times. LoRA performs on-par or better than fine-tuning in model quality on RoBERTa, DeBERTa, GPT-2, and GPT-3, despite having fewer trainable parameters, a higher training throughput, and, unlike adapters, no additional inference latency.",
+        "domain": "Natural Language Processing"
+      },
+      {
+        "paper_id": "P013",
+        "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+        "authors": ["Tri Dao", "Daniel Y. Fu", "Stefano Ermon", "Atri Rudra", "Christopher Re"],
+        "year": 2022,
+        "venue": "NeurIPS",
+        "abstract": "Transformers are slow and memory-hungry on long sequences, since the time and memory complexity of self-attention are quadratic in sequence length. Approximate attention methods have attempted to address this problem by trading off model quality to reduce the compute complexity, but often do not achieve wall-clock speedup. We argue that a missing principle is making attention algorithms IO-aware — accounting for reads and writes between levels of GPU memory. We propose FlashAttention, an IO-aware exact attention algorithm that uses tiling to reduce the number of memory reads/writes between GPU high bandwidth memory (HBM) and GPU on-chip SRAM. We analyze the IO complexity of FlashAttention, showing that it requires fewer HBM accesses than standard attention, and is optimal for a range of SRAM sizes. We also extend FlashAttention to block-sparse attention, yielding an approximate attention algorithm that is faster than any existing approximate attention method. FlashAttention trains Transformers faster than existing baselines: 15% end-to-end wall-clock speedup on BERT-large (seq. length 512) compared to the MLPerf 1.1 training speed record, 3× speedup on GPT-2 (seq. length 1K), and 2.4× speedup on long-range arena (seq. length 1K-4K).",
+        "domain": "Machine Learning"
+      },
+      {
+        "paper_id": "P014",
+        "title": "Mixture of Experts with Expert Choice Routing",
+        "authors": ["Yanqi Zhou", "Tao Lei", "Hanxiao Liu", "Nan Du", "Yanping Huang", "Vincent Zhao", "Andrew Dai", "Zhifeng Chen", "Quoc Le", "James Laudon"],
+        "year": 2022,
+        "venue": "NeurIPS",
+        "abstract": "Sparsely-activated Mixture-of-experts (MoE) models allow the number of parameters to greatly increase while keeping the amount of computation for a given token constant. However, conventional MoE methods like Switch Transformer suffer from load imbalancing: some experts are over-utilized while others are under-utilized. In this paper, we propose a new routing method, Expert Choice (EC), that addresses the load balancing problem by having each expert pick the top-k tokens instead of having each token pick the top-k experts. This formulation naturally ensures load balance and allows for a variable number of experts per token. We show that Expert Choice improves training convergence and downstream task performance over strong baselines like Switch Transformer and hash routing, with up to 2× faster training convergence. Our method achieves strong scaling results: a 8B/64E model trained with Expert Choice matches the performance of a dense 100B+ parameter model while using only a fraction of the compute.",
+        "domain": "Machine Learning"
+      },
+      {
+        "paper_id": "P015",
+        "title": "Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference",
+        "authors": ["Benoit Jacob", "Skirmantas Kligys", "Bo Chen", "Menglong Zhu", "Matthew Tang", "Andrew Howard", "Hartwig Adam", "Dmitry Kalenichenko"],
+        "year": 2018,
+        "venue": "CVPR",
+        "abstract": "The rising popularity of intelligent mobile devices and the daunting computational cost of deep learning-based models call for efficient and accurate on-device inference schemes. We propose a quantization scheme that allows inference to be carried out using integer-only arithmetic. This can be implemented more efficiently than floating point inference on commonly available integer-only hardware. We also propose a co-designed training procedure to preserve end-to-end model accuracy post quantization. As a result, the proposed quantization scheme improves the tradeoff between accuracy and on-device latency. The improvements are significant even on MobileNets which are already optimized for mobile applications. For example, we achieve a 4× reduction of model size and 3× speedup on real mobile inference platforms while only losing 1% top-1 accuracy on ImageNet classification.",
+        "domain": "Machine Learning"
+      },
+      {
+        "paper_id": "P016",
+        "title": "LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale",
+        "authors": ["Tim Dettmers", "Mike Lewis", "Younes Belkada", "Luke Zettlemoyer"],
+        "year": 2022,
+        "venue": "NeurIPS",
+        "abstract": "Large language models have been widely adopted but require significant GPU memory for inference. We develop a procedure for Int8 matrix multiplication for feed-forward and attention projection layers in transformers, which cut the memory needed for inference by half while retaining full precision performance. With our method, a 175B parameter 16/32-bit checkpoint can be loaded, converted to Int8, and used immediately without performance degradation. This is made possible by understanding and working around properties of highly systematic emergent features in transformer language models that dominate attention and transformer predictive performance. To cope with these features, we develop a two-part quantization procedure, LLM.int8(). We first use vector-wise quantization with separate normalization constants for each inner product in the matrix multiplication, to quantize most of the features. However, for the emergent outliers, we use a new mixed-precision decomposition scheme. Using LLM.int8(), we show empirically it is possible to perform inference in LLMs with up to 175B parameters without any performance degradation.",
+        "domain": "Machine Learning"
+      },
+      {
+        "paper_id": "P017",
+        "title": "Distilling the Knowledge in a Neural Network",
+        "authors": ["Geoffrey Hinton", "Oriol Vinyals", "Jeff Dean"],
+        "year": 2015,
+        "venue": "NeurIPS Workshop",
+        "abstract": "A very simple way to improve the performance of almost any machine learning algorithm is to train many different models on the same data and then to average their predictions. Unfortunately, making predictions using a whole ensemble of models is cumbersome and may be too computationally expensive to allow deployment to a large number of users. We propose the idea of distillation — compressing the knowledge in an ensemble into a single smaller model that is much easier to deploy. An obvious way to transfer the knowledge is to use the class probabilities produced by the ensemble as soft targets for training the small model. When the soft targets have high entropy, they provide much more information per training case than hard targets and much less variance in the gradient between training cases, so the small model can often be trained on much less data than the original ensemble. We show that distillation works very well on MNIST, and a specialist system trained on JFT achieves state-of-the-art results.",
+        "domain": "Machine Learning"
+      }
+    ],
+    "ground_truth": {
+      "overview": "The eight papers collectively address the challenge of making large neural networks—particularly Transformers and large language models—more efficient to train, deploy, and serve. The research spans scaling laws that govern how to allocate compute budgets, parameter-efficient fine-tuning methods, hardware-aware attention algorithms, sparse expert architectures, quantization techniques, and model compression via distillation.",
+      "themes": [
+        "Compute-optimal training and scaling laws for language models",
+        "Parameter reduction via low-rank adaptation and knowledge distillation",
+        "Efficient attention mechanisms through hardware-aware and approximate methods",
+        "Model compression through quantization for deployment",
+        "Sparse expert architectures for conditional computation"
+      ],
+      "evidence_points": [
+        "P010: Loss scales as a power-law with model size, dataset size, and compute across seven orders of magnitude.",
+        "P011: Chinchilla (70B) outperforms Gopher (280B) by training on 4x more data with the same compute budget.",
+        "P012: LoRA reduces trainable parameters by 10,000x and GPU memory by 3x while matching full fine-tuning quality.",
+        "P013: FlashAttention achieves 15% speedup on BERT-large and 3x speedup on GPT-2 through IO-aware tiling.",
+        "P014: Expert Choice routing achieves 2x faster training convergence and matches dense 100B+ models with 8B/64E sparse models.",
+        "P015: Integer-only quantization provides 4x model size reduction and 3x mobile inference speedup with 1% accuracy loss.",
+        "P016: LLM.int8() halves inference memory for 175B parameter models without performance degradation.",
+        "P017: Knowledge distillation compresses ensemble knowledge into a single model using soft probability targets."
+      ],
+      "contradictions": [
+        "P010 suggests training large models on modest data and stopping early is compute-optimal, while P011 finds that models should be trained on far more data than current practice, indicating P010's recommendations lead to under-trained models.",
+        "P013 argues against approximate attention methods (like those in P007-P009) by showing that exact, IO-aware attention can be faster in practice than approximate methods."
+      ],
+      "limitations": [
+        "Scaling laws (P010, P011) are empirical and may not generalize to all architectures, modalities, or training regimes.",
+        "LoRA (P012) only adapts weight matrices and may not capture all task-specific adaptation needs.",
+        "FlashAttention (P013) requires custom CUDA kernels and may not be easily portable to non-NVIDIA hardware.",
+        "MoE models (P014) introduce training instability and communication overhead in distributed settings.",
+        "Quantization methods (P015, P016) focus primarily on inference efficiency; quantized training remains challenging.",
+        "Knowledge distillation (P017) requires a trained teacher model and the quality of the student is bounded by the teacher."
+      ],
+      "research_gaps": [
+        "Combining multiple efficiency techniques (e.g., MoE + quantization + LoRA) in a unified framework is underexplored.",
+        "Scaling laws for efficiency-oriented architectures (sparse models, quantized models) have not been extensively studied.",
+        "The interaction between hardware-aware optimization (FlashAttention) and model architecture choices is not well understood.",
+        "Distillation techniques specifically designed for very large language models (100B+) remain limited.",
+        "Theoretical understanding of why low-rank adaptations and quantization preserve model quality is lacking."
+      ],
+      "future_directions": [
+        "Develop unified scaling laws that jointly account for model size, data, compute, and efficiency techniques.",
+        "Create frameworks that compose LoRA, quantization, MoE, and FlashAttention for multiplicative efficiency gains.",
+        "Study how to distil very large sparse-expert models into smaller dense models effectively.",
+        "Extend hardware-aware optimization beyond NVIDIA GPUs to diverse accelerators and edge devices.",
+        "Investigate compute-optimal training for multimodal and multi-task models."
+      ],
+      "paper_ids": ["P010", "P011", "P012", "P013", "P014", "P015", "P016", "P017"]
+    }
+  }
+]

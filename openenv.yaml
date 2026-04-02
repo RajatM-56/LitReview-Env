@@ -1,0 +1,11 @@
+spec_version: 1
+name: litreview_env
+type: environment
+runtime: python
+app: server.app:app
+port: 8000
+description: >
+  An agentic benchmark for academic literature review. Agents read paper
+  abstracts, extract findings, compare studies, and synthesize structured
+  literature reviews with gap analysis. Three difficulty levels test
+  extraction, comparison, and full synthesis capabilities.

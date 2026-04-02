@@ -1,0 +1,77 @@
+[
+  {
+    "task_id": "easy_001",
+    "difficulty": "easy",
+    "instruction": "Read the following paper abstract carefully. Extract a structured record with these fields: problem (the research problem addressed), method (the methodology or approach used), dataset_or_domain (the dataset or application domain), key_finding (the main result or contribution), limitation (any stated or implied limitations), and confidence (your confidence in the extraction: high, medium, or low). Return your answer as a JSON object with exactly these six keys.",
+    "max_steps": 3,
+    "papers": [
+      {
+        "paper_id": "P001",
+        "title": "Attention Is All You Need",
+        "authors": ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar", "Jakob Uszkoreit", "Llion Jones", "Aidan N. Gomez", "Lukasz Kaiser", "Illia Polosukhin"],
+        "year": 2017,
+        "venue": "NeurIPS",
+        "abstract": "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show that these models are superior in quality while being more parallelizable and requiring significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles, by over 2 BLEU. On the WMT 2014 English-to-French translation task, our model establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature. We show that the Transformer generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data.",
+        "domain": "Natural Language Processing"
+      }
+    ],
+    "ground_truth": {
+      "problem": "Sequence transduction models rely on complex recurrent or convolutional architectures that are difficult to parallelize and slow to train.",
+      "method": "Transformer architecture based solely on attention mechanisms, eliminating recurrence and convolutions.",
+      "dataset_or_domain": "Machine translation (WMT 2014 English-German and English-French) and English constituency parsing.",
+      "key_finding": "The Transformer achieves state-of-the-art BLEU scores (28.4 EN-DE, 41.8 EN-FR) while training significantly faster and being more parallelizable than recurrent models.",
+      "limitation": "Evaluation focused primarily on translation and parsing; generalization to other NLP tasks and modalities not extensively studied in this work.",
+      "confidence": "high"
+    }
+  },
+  {
+    "task_id": "easy_002",
+    "difficulty": "easy",
+    "instruction": "Read the following paper abstract carefully. Extract a structured record with these fields: problem (the research problem addressed), method (the methodology or approach used), dataset_or_domain (the dataset or application domain), key_finding (the main result or contribution), limitation (any stated or implied limitations), and confidence (your confidence in the extraction: high, medium, or low). Return your answer as a JSON object with exactly these six keys.",
+    "max_steps": 3,
+    "papers": [
+      {
+        "paper_id": "P002",
+        "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+        "authors": ["Jacob Devlin", "Ming-Wei Chang", "Kenton Lee", "Kristina Toutanova"],
+        "year": 2019,
+        "venue": "NAACL",
+        "abstract": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing benchmarks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
+        "domain": "Natural Language Processing"
+      }
+    ],
+    "ground_truth": {
+      "problem": "Previous language models use unidirectional or shallow bidirectional pre-training, limiting the representational power of learned features.",
+      "method": "BERT uses masked language modeling and next sentence prediction to pre-train deep bidirectional Transformer representations, followed by task-specific fine-tuning.",
+      "dataset_or_domain": "Eleven NLP benchmarks including GLUE, MultiNLI, SQuAD v1.1, and SQuAD v2.0.",
+      "key_finding": "BERT achieves state-of-the-art on all eleven benchmarks, with absolute improvements of 7.7% on GLUE and significant gains on question answering tasks.",
+      "limitation": "Pre-training is computationally expensive; the masked language model objective creates a mismatch between pre-training and fine-tuning since mask tokens do not appear during fine-tuning.",
+      "confidence": "high"
+    }
+  },
+  {
+    "task_id": "easy_003",
+    "difficulty": "easy",
+    "instruction": "Read the following paper abstract carefully. Extract a structured record with these fields: problem (the research problem addressed), method (the methodology or approach used), dataset_or_domain (the dataset or application domain), key_finding (the main result or contribution), limitation (any stated or implied limitations), and confidence (your confidence in the extraction: high, medium, or low). Return your answer as a JSON object with exactly these six keys.",
+    "max_steps": 3,
+    "papers": [
+      {
+        "paper_id": "P003",
+        "title": "Deep Residual Learning for Image Recognition",
+        "authors": ["Kaiming He", "Xiangyu Zhang", "Shaoqing Ren", "Jian Sun"],
+        "year": 2016,
+        "venue": "CVPR",
+        "abstract": "Deeper neural networks are more difficult to train. We present a residual learning framework to ease the training of networks that are substantially deeper than those used previously. We explicitly reformulate the layers as learning residual functions with reference to the layer inputs, instead of learning unreferenced functions. We provide comprehensive empirical evidence showing that these residual networks are easier to optimize, and can gain accuracy from considerably increased depth. On the ImageNet dataset we evaluate residual nets with a depth of up to 152 layers—8x deeper than VGG nets but still having lower complexity. An ensemble of these residual nets achieves 3.57% error on the ImageNet test set. This result won the 1st place on the ILSVRC 2015 classification task. We also present analysis on CIFAR-10 with 100 and 1000 layers. The depth of representations is of central importance for many visual recognition tasks. Solely due to our extremely deep representations, we obtain a 28% relative improvement on the COCO object detection dataset. Deep residual nets are foundations of our submissions to ILSVRC & COCO 2015 competitions, where we also won the 1st places on the tasks of ImageNet detection, ImageNet localization, COCO detection, and COCO segmentation.",
+        "domain": "Computer Vision"
+      }
+    ],
+    "ground_truth": {
+      "problem": "Training very deep neural networks is difficult due to degradation problems where accuracy saturates and then degrades with increased depth.",
+      "method": "Residual learning framework with skip connections that reformulate layers as learning residual functions with reference to the layer inputs.",
+      "dataset_or_domain": "ImageNet (ILSVRC 2015), CIFAR-10, and COCO object detection.",
+      "key_finding": "ResNets with up to 152 layers achieve 3.57% top-5 error on ImageNet and 28% relative improvement on COCO, winning multiple competition tracks.",
+      "limitation": "The study focuses primarily on image classification and detection; theoretical understanding of why residual connections work is not fully explored.",
+      "confidence": "high"
+    }
+  }
+]

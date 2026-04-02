@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+*.pyo
+.git
+.gitignore
+.env
+*.egg-info
+dist/
+build/
+.pytest_cache
+.mypy_cache
+.venv
+venv
+outputs/
+*.json
+!data/**/*.json
+node_modules/
