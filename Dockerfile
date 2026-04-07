@@ -22,14 +22,14 @@ COPY src/ ./src/
 COPY server/ ./server/
 COPY data/ ./data/
 COPY scripts/ ./scripts/
+COPY ui/ ./ui/
 COPY openenv.yaml .
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8501
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Health check (Streamlit has a default health endpoint)
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health || exit 1
 
 # Run server
-CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["streamlit", "run", "ui/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
