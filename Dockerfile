@@ -34,7 +34,7 @@ EXPOSE 7860
 USER appuser
 
 # Health check
-HEALTHCHECK CMD curl --fail http://localhost:7860/_stcore/health || exit 1
+HEALTHCHECK CMD curl --fail http://localhost:7860/health || exit 1
 
 # Run server
-CMD ["streamlit", "run", "ui/app.py", "--server.port", "7860", "--server.address", "0.0.0.0"]
+CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]
