@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import json
+from datetime import datetime
 
 # ── Plotly Template ──────────────────────────────────────────────────────────
 PLOTLY_LAYOUT = dict(
@@ -25,6 +26,79 @@ COLORS = {
     "cyan": "#39d2c0",
     "grid": "#21262d",
 }
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# UTILITY FUNCTIONS
+# ═════════════════════════════════════════════════════════════════════════════
+def copy_button(text, label="📋 Copy"):
+    """Display a copy-to-clipboard button"""
+    col1, col2 = st.columns([1, 0.15])
+    with col1:
+        st.code(text, language="json")
+    with col2:
+        st.write("")  # Spacing
+        if st.button("📋", key=f"copy_{hash(text)}", help="Copy to clipboard"):
+            st.write(text)
+
+
+def get_score_history(trajectory):
+    """Extract score progression from trajectory"""
+    if not trajectory:
+        return []
+    
+    history = []
+    for i, entry in enumerate(trajectory):
+        if isinstance(entry, dict) and "scores" in entry:
+            score = entry["scores"].get("aggregate", 0)
+            history.append({"attempt": i+1, "score": score})
+    return history
+
+
+def render_score_history(trajectory):
+    """Render score history chart showing progression over attempts."""
+    history = get_score_history(trajectory)
+    if not history or len(history) < 2:
+        st.info("💡 Run more tasks to see score progression chart")
+        return
+    
+    df = pd.DataFrame(history)
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df["attempt"],
+        y=df["score"],
+        mode="lines+markers",
+        name="Score",
+        line=dict(color=COLORS["accent"], width=3),
+        marker=dict(size=8, color=COLORS["accent"]),
+        fill="tozeroy",
+        fillcolor="rgba(88,166,255,0.1)",
+    ))
+    
+    # Add moving average line if enough data points
+    if len(history) >= 3:
+        df["ma"] = df["score"].rolling(window=3, center=True).mean()
+        fig.add_trace(go.Scatter(
+            x=df["attempt"],
+            y=df["ma"],
+            mode="lines",
+            name="Trend",
+            line=dict(color=COLORS["cyan"], width=2, dash="dash"),
+        ))
+    
+    fig.update_layout(
+        **PLOTLY_LAYOUT,
+        title="📈 Score Progression",
+        xaxis_title="Attempt #",
+        yaxis_title="Score",
+        height=300,
+        margin=dict(l=50, r=30, t=50, b=50),
+        hovermode="x unified",
+        yaxis=dict(range=[0, 1], tickformat=".0%"),
+    )
+    
+    st.plotly_chart(fig, width="stretch")
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -52,6 +126,41 @@ def render_empty_state():
     """, unsafe_allow_html=True)
 
 
+def _render_quick_stats(trajectory):
+    """Render quick stats panel showing trajectory progress."""
+    if not trajectory:
+        return
+    
+    # Calculate stats
+    scores = []
+    for entry in trajectory:
+        if isinstance(entry, dict) and "scores" in entry:
+            score = entry["scores"].get("aggregate", 0)
+            scores.append(score)
+    
+    if not scores:
+        return
+    
+    attempts = len(scores)
+    best_score = max(scores) * 100
+    avg_score = sum(scores) / len(scores) * 100
+    current_score = scores[-1] * 100
+    
+    # Display metrics
+    st.markdown("---")
+    st.markdown("#### 📊 Quick Stats")
+    
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Attempts", attempts)
+    m2.metric("Current Score", f"{current_score:.1f}%")
+    m3.metric("Best Score", f"{best_score:.1f}%")
+    m4.metric("Average Score", f"{avg_score:.1f}%")
+    
+    # Show score history chart
+    if attempts >= 2:
+        render_score_history(trajectory)
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 # MAIN DASHBOARD ORCHESTRATOR
 # ═════════════════════════════════════════════════════════════════════════════
@@ -61,6 +170,11 @@ def render_dashboard(obs, traj, fb, batch):
     # ── TIER 1: Suite Analytics (only if batch data exists) ──────────────
     if batch:
         _render_suite(batch)
+        st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Quick Stats Panel (only if trajectory exists but no batch) ─────────
+    if traj and not batch:
+        _render_quick_stats(traj)
         st.markdown("<br>", unsafe_allow_html=True)
 
     # ── TIER 2: Current Task View ────────────────────────────────────────
@@ -227,67 +341,63 @@ def _render_grader(fb):
 
     _section("⚖️", "Grader Analysis")
 
-    # Left: Score + progress bars, Right: compact radar
-    col_metrics, col_radar = st.columns([3, 2], gap="large")
-
-    with col_metrics:
-        # Score ring
-        st.markdown(f"""
-        <div style="display:flex; align-items:center; gap:24px; margin-bottom:1rem;">
-            <div style="
-                width:90px; height:90px; border-radius:50%;
-                border:3px solid {ring_color};
-                display:flex; flex-direction:column;
-                align-items:center; justify-content:center;
-                box-shadow: 0 0 20px {ring_color}33;
-                flex-shrink:0;
-            ">
-                <span style="font-size:1.6rem; font-weight:800; color:#e6edf3;">{score:.0%}</span>
-                <span style="font-size:0.6rem; color:#8b949e; text-transform:uppercase; letter-spacing:1px;">Score</span>
-            </div>
-            <div style="flex:1;">
-                <div style="font-size:0.8rem; color:#c9d1d9; line-height:1.8;">Final grading result for the current task. Breakdown shown in the progress bars below.</div>
-            </div>
+    # Score ring and progress bars
+    st.markdown(f"""
+    <div style="display:flex; align-items:center; gap:24px; margin-bottom:1.5rem;">
+        <div style="
+            width:90px; height:90px; border-radius:50%;
+            border:3px solid {ring_color};
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            box-shadow: 0 0 20px {ring_color}33;
+            flex-shrink:0;
+        ">
+            <span style="font-size:1.6rem; font-weight:800; color:#e6edf3;">{score:.0%}</span>
+            <span style="font-size:0.6rem; color:#8b949e; text-transform:uppercase; letter-spacing:1px;">Score</span>
         </div>
-        """, unsafe_allow_html=True)
+        <div style="flex:1;">
+            <div style="font-size:0.8rem; color:#c9d1d9; line-height:1.8;">Final grading result for the current task. Breakdown shown in the progress bars below.</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-        # Progress bars
-        fmt = bd.get("format_score", 0.0)
-        cnt = bd.get("content_score", 0.0)
-        gnd = bd.get("grounding_score", 0.0)
-        st.progress(min(max(fmt, 0.0), 1.0), text=f"Format — {fmt:.0%}")
-        st.progress(min(max(cnt, 0.0), 1.0), text=f"Content — {cnt:.0%}")
-        if "grounding_score" in bd:
-            st.progress(min(max(gnd, 0.0), 1.0), text=f"Grounding — {gnd:.0%}")
+    # Progress bars
+    fmt = bd.get("format_score", 0.0)
+    cnt = bd.get("content_score", 0.0)
+    gnd = bd.get("grounding_score", 0.0)
+    st.progress(min(max(fmt, 0.0), 1.0), text=f"Format — {fmt:.0%}")
+    st.progress(min(max(cnt, 0.0), 1.0), text=f"Content — {cnt:.0%}")
+    if "grounding_score" in bd:
+        st.progress(min(max(gnd, 0.0), 1.0), text=f"Grounding — {gnd:.0%}")
 
-    with col_radar:
-        # Compact radar chart
-        if "field_scores" in bd and bd["field_scores"]:
-            fields = list(bd["field_scores"].keys())
-            values = list(bd["field_scores"].values())
-            fields_display = [f.replace("_", " ").title() for f in fields]
+    # Radar chart below
+    st.markdown("---")
+    if "field_scores" in bd and bd["field_scores"]:
+        fields = list(bd["field_scores"].keys())
+        values = list(bd["field_scores"].values())
+        fields_display = [f.replace("_", " ").title() for f in fields]
 
-            fig = go.Figure()
-            fig.add_trace(go.Scatterpolar(
-                r=values + [values[0]],
-                theta=fields_display + [fields_display[0]],
-                fill="toself",
-                fillcolor="rgba(88,166,255,0.12)",
-                line=dict(color=COLORS["accent"], width=2),
-                marker=dict(size=4, color=COLORS["accent"]),
-            ))
-            fig.update_layout(
-                **PLOTLY_LAYOUT,
-                height=220,
-                margin=dict(l=30, r=30, t=10, b=10),
-                polar=dict(
-                    bgcolor="rgba(0,0,0,0)",
-                    radialaxis=dict(visible=True, range=[0, 1], gridcolor="#21262d", tickfont=dict(size=8, color="#8b949e")),
-                    angularaxis=dict(gridcolor="#30363d", tickfont=dict(size=9, color="#c9d1d9")),
-                ),
-                showlegend=False,
-            )
-            st.plotly_chart(fig, key="radar", width="stretch")
+        fig = go.Figure()
+        fig.add_trace(go.Scatterpolar(
+            r=values + [values[0]],
+            theta=fields_display + [fields_display[0]],
+            fill="toself",
+            fillcolor="rgba(88,166,255,0.12)",
+            line=dict(color=COLORS["accent"], width=2),
+            marker=dict(size=4, color=COLORS["accent"]),
+        ))
+        fig.update_layout(
+            **PLOTLY_LAYOUT,
+            height=350,
+            margin=dict(l=50, r=50, t=30, b=30),
+            polar=dict(
+                bgcolor="rgba(0,0,0,0)",
+                radialaxis=dict(visible=True, range=[0, 1], gridcolor="#21262d", tickfont=dict(size=8, color="#8b949e")),
+                angularaxis=dict(gridcolor="#30363d", tickfont=dict(size=9, color="#c9d1d9")),
+            ),
+            showlegend=False,
+        )
+        st.plotly_chart(fig, key="radar", width="stretch")
 
     # Warnings
     if bd.get("missing_fields"):
@@ -321,9 +431,17 @@ def _render_output(traj):
     try:
         data = json.loads(content)
     except Exception:
-        st.code(content, language="json")
+        # Add copy button for raw content
+        col1, col2 = st.columns([1, 0.12])
+        with col1:
+            st.code(content, language="json")
+        with col2:
+            st.write("")
+            if st.button("📋", key="copy_raw_output", help="Copy to clipboard", width="content"):
+                st.text_area("Copy this:", value=content, height=100, key="raw_copy_ta")
         return
 
+    # Display fields with copy option
     for k, v in data.items():
         label = k.replace("_", " ").title()
         if isinstance(v, list):
@@ -338,6 +456,11 @@ def _render_output(traj):
             <div class="field-value">{val_html}</div>
         </div>
         """, unsafe_allow_html=True)
+    
+    # Full JSON copy button
+    st.markdown("---")
+    if st.button("📋 Copy Full JSON Output", key="copy_full_output", width="stretch"):
+        st.text_area("Copy this:", value=json.dumps(data, indent=2), height=150, key="json_copy_ta")
 
 
 # ═════════════════════════════════════════════════════════════════════════════

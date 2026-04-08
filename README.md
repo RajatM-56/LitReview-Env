@@ -222,6 +222,12 @@ curl -X POST http://localhost:8000/step \
 curl http://localhost:8000/state
 ```
 
+### Streamlit UI
+
+```bash
+python -m streamlit run ui\app.py
+```
+
 ### Baseline Inference
 
 ```bash
