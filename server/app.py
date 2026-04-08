@@ -91,11 +91,13 @@ async def info():
 
 
 @app.post("/reset")
-async def reset(request: ResetRequest):
+async def reset(request: Optional[ResetRequest] = None):
     """Reset the environment and start a new episode."""
     env = _get_env()
     try:
-        obs = env.reset(task_id=request.task_id, difficulty=request.difficulty)
+        task_id = request.task_id if request else None
+        difficulty = request.difficulty if request else None
+        obs = env.reset(task_id=task_id, difficulty=difficulty)
         return {
             "observation": obs.model_dump(),
             "state": env.state.model_dump(),
@@ -105,18 +107,19 @@ async def reset(request: ResetRequest):
 
 
 @app.post("/step")
-async def step(request: StepRequest):
+async def step(request: Optional[StepRequest] = None):
     """Execute an action in the environment."""
     env = _get_env()
+    req = request or StepRequest()
     try:
-        action_type = ActionType(request.action_type)
+        action_type = ActionType(req.action_type)
     except ValueError:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid action_type: {request.action_type}. Must be one of: submit, request_hint, nop",
+            detail=f"Invalid action_type: {req.action_type}. Must be one of: submit, request_hint, nop",
         )
 
-    action = LitReviewAction(action_type=action_type, content=request.content)
+    action = LitReviewAction(action_type=action_type, content=req.content)
 
     try:
         result = env.step(action)
