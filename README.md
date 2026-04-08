@@ -1,3 +1,14 @@
+---
+title: LitReview-Env
+emoji: 📚
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # LitReview-Env
 
 > An OpenEnv environment for academic literature review benchmarking.
