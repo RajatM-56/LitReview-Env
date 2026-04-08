@@ -202,7 +202,7 @@ def run_task(
     start_time = time.time()
 
     # Pre-Submission Checklist: Exact Structured Logs
-    print("START")
+    print(f"[START] task={task_id}", flush=True)
 
     # Reset environment
     obs = env.reset(task_id=task_id)
@@ -219,9 +219,10 @@ def run_task(
     best_result = None
     last_content = ""
 
+    turns_taken = 0
     for turn in range(min(max_turns, obs.max_steps)):
+        turns_taken += 1
         # Pre-Submission Checklist: Exact Structured Logs
-        print("STEP")
 
         # Call model
         content = call_model(client, model, messages, temperature)
@@ -239,6 +240,9 @@ def run_task(
         if score > best_score:
             best_score = score
             best_result = result
+
+        # Pre-Submission Checklist: Exact Structured Logs
+        print(f"[STEP] step={turns_taken} reward={score}", flush=True)
 
         # If score is good enough or episode is done, stop
         if score >= 0.90 or result.done:
@@ -260,10 +264,10 @@ def run_task(
             best_result = result if 'result' in dir() else None
 
     # Pre-Submission Checklist: Exact Structured Logs
-    print("END")
-
-    elapsed = time.time() - start_time
     final_score = best_score
+    elapsed = time.time() - start_time
+
+    print(f"[END] task={task_id} score={final_score} steps={turns_taken}", flush=True)
 
     return {
         "task_id": task_id,
