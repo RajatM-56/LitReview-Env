@@ -83,7 +83,8 @@ def grade_easy(response: dict[str, Any], ground_truth: dict[str, Any]) -> dict[s
     breakdown["content_score"] = round(weighted_sum, 3)
 
     # Final score blends format and content
-    score = 0.10 * format_score + 0.90 * weighted_sum
+    raw_score = 0.10 * format_score + 0.90 * weighted_sum
+    score = max(0.001, min(0.999, raw_score))
     breakdown["final_score"] = round(score, 3)
 
     return {"score": round(score, 4), "breakdown": breakdown}
@@ -162,7 +163,8 @@ def grade_medium(response: dict[str, Any], ground_truth: dict[str, Any]) -> dict
     breakdown["grounding_score"] = round(grounding, 3)
     breakdown["hallucinated_ids"] = hallucinated
 
-    score = 0.10 * format_score + 0.80 * weighted_sum + 0.10 * grounding
+    raw_score = 0.10 * format_score + 0.80 * weighted_sum + 0.10 * grounding
+    score = max(0.001, min(0.999, raw_score))
     breakdown["final_score"] = round(score, 3)
 
     return {"score": round(score, 4), "breakdown": breakdown}
@@ -253,7 +255,8 @@ def grade_hard(response: dict[str, Any], ground_truth: dict[str, Any]) -> dict[s
     breakdown["grounding_score"] = round(grounding, 3)
     breakdown["hallucinated_ids"] = hallucinated
 
-    score = 0.10 * format_score + 0.75 * weighted_sum + 0.15 * grounding
+    raw_score = 0.10 * format_score + 0.75 * weighted_sum + 0.15 * grounding
+    score = max(0.001, min(0.999, raw_score))
     breakdown["final_score"] = round(score, 3)
 
     return {"score": round(score, 4), "breakdown": breakdown}

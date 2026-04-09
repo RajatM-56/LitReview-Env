@@ -53,63 +53,80 @@ def compute_reward(
         Tuple of (reward, feedback_message, grading_info).
     """
     info: dict[str, Any] = {}
+    reward = 0.0
+    feedback = ""
+    score = 0.0
 
     # --- NOP action ---
     if action_type == ActionType.NOP:
+        score = 0.001
+        reward = PENALTY_NOP
         if state.nop_count >= 2:
-            return PENALTY_REPEATED_NOP, "Repeated no-op actions are penalized. Please submit a response.", info
-        return PENALTY_NOP, "No-op action taken. Use 'submit' to provide your analysis.", info
+            reward = PENALTY_REPEATED_NOP
+            feedback = "Repeated no-op actions are penalized. Please submit a response."
+        else:
+            feedback = "No-op action taken. Use 'submit' to provide your analysis."
+        info["grading"] = {"score": score}
 
     # --- HINT action ---
-    if action_type == ActionType.REQUEST_HINT:
-        return HINT_COST, _generate_hint(difficulty, state.hint_count), info
+    elif action_type == ActionType.REQUEST_HINT:
+        score = 0.001
+        reward = HINT_COST
+        feedback = _generate_hint(difficulty, state.hint_count)
+        info["grading"] = {"score": score}
 
     # --- SUBMIT action ---
-    assert action_type == ActionType.SUBMIT
+    elif action_type == ActionType.SUBMIT:
+        # Empty submission
+        if not content or not content.strip():
+            score = 0.001
+            reward = PENALTY_EMPTY_SUBMIT
+            feedback = "Empty submission. Please provide a structured JSON response."
+            info["grading"] = {"score": score}
+        else:
+            # Parse JSON
+            parsed = safe_parse_json(content)
+            if parsed is None:
+                score = 0.001
+                reward = PENALTY_INVALID_JSON
+                feedback = (
+                    "Could not parse your response as valid JSON. "
+                    "Please return a well-formed JSON object with the required fields."
+                )
+                info["grading"] = {"score": score}
+            else:
+                # Grade the response
+                grading_result = grade(difficulty, parsed, ground_truth)
+                score = grading_result["score"]
+                breakdown = grading_result["breakdown"]
+                info["grading"] = grading_result
 
-    # Empty submission
-    if not content or not content.strip():
-        return PENALTY_EMPTY_SUBMIT, "Empty submission. Please provide a structured JSON response.", info
+                # Base reward from grading score (0 to 1)
+                reward = score
 
-    # Parse JSON
-    parsed = safe_parse_json(content)
-    if parsed is None:
-        return PENALTY_INVALID_JSON, (
-            "Could not parse your response as valid JSON. "
-            "Please return a well-formed JSON object with the required fields."
-        ), info
+                # Bonus for first valid submission
+                if state.submission_count == 0:
+                    reward += BONUS_FIRST_VALID_SUBMIT
+                    info["first_submit_bonus"] = True
 
-    # Grade the response
-    grading_result = grade(difficulty, parsed, ground_truth)
-    score = grading_result["score"]
-    breakdown = grading_result["breakdown"]
-    info["grading"] = grading_result
+                # Bonus for improvement over previous best
+                if score > state.best_score and state.submission_count > 0:
+                    reward += BONUS_IMPROVEMENT
+                    info["improvement_bonus"] = True
 
-    # Base reward from grading score (0 to 1)
-    reward = score
+                # Hallucination penalty
+                hallucinated = breakdown.get("hallucinated_ids", [])
+                if hallucinated:
+                    penalty = PENALTY_HALLUCINATED_IDS * len(hallucinated)
+                    reward += penalty
+                    info["hallucination_penalty"] = penalty
 
-    # Bonus for first valid submission
-    if state.submission_count == 0:
-        reward += BONUS_FIRST_VALID_SUBMIT
-        info["first_submit_bonus"] = True
+                # Build feedback message
+                feedback = _build_feedback(score, breakdown, difficulty)
 
-    # Bonus for improvement over previous best
-    if score > state.best_score and state.submission_count > 0:
-        reward += BONUS_IMPROVEMENT
-        info["improvement_bonus"] = True
-
-    # Hallucination penalty
-    hallucinated = breakdown.get("hallucinated_ids", [])
-    if hallucinated:
-        penalty = PENALTY_HALLUCINATED_IDS * len(hallucinated)
-        reward += penalty
-        info["hallucination_penalty"] = penalty
-
-    # Clamp to [-1, 1]
-    reward = max(-1.0, min(1.0, reward))
-
-    # Build feedback message
-    feedback = _build_feedback(score, breakdown, difficulty)
+    # Clamp to [0.001, 0.999] for OpenEnv validation
+    # This ensures that even "penalties" are reported as valid scores
+    reward = max(0.001, min(0.999, reward))
 
     return round(reward, 4), feedback, info
 

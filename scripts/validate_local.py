@@ -41,12 +41,12 @@ def validate_task(env: LitReviewEnvironment, task_id: str) -> dict:
 
     # Test NOP action
     nop_result = env.step(LitReviewAction(action_type=ActionType.NOP))
-    assert nop_result.reward < 0, "NOP should have negative reward"
+    assert 0.0 < nop_result.reward < 0.2, f"NOP should have low positive reward, got {nop_result.reward}"
     print(f"  ✓ NOP: reward={nop_result.reward}")
 
     # Test hint action
     hint_result = env.step(LitReviewAction(action_type=ActionType.REQUEST_HINT))
-    assert hint_result.reward < 0, "Hint should have negative reward (cost)"
+    assert 0.0 < hint_result.reward < 0.2, f"Hint should have low positive reward (cost), got {hint_result.reward}"
     print(f"  ✓ Hint: reward={hint_result.reward}")
 
     # Test invalid JSON submit
@@ -54,7 +54,7 @@ def validate_task(env: LitReviewEnvironment, task_id: str) -> dict:
         action_type=ActionType.SUBMIT,
         content="this is not json",
     ))
-    assert invalid_result.reward < 0, "Invalid JSON should have negative reward"
+    assert 0.0 < invalid_result.reward < 0.2, f"Invalid JSON should have low positive reward, got {invalid_result.reward}"
     print(f"  ✓ Invalid JSON: reward={invalid_result.reward}")
 
     # Test valid submission with ground truth (perfect score baseline)
@@ -76,7 +76,7 @@ def validate_task(env: LitReviewEnvironment, task_id: str) -> dict:
         action_type=ActionType.SUBMIT,
         content="",
     ))
-    assert empty_result.reward < 0, "Empty submission should have negative reward"
+    assert 0.0 < empty_result.reward < 0.2, f"Empty submission should have low positive reward, got {empty_result.reward}"
     print(f"  ✓ Empty submit: reward={empty_result.reward}")
 
     return {
