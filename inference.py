@@ -215,7 +215,7 @@ def run_task(
         {"role": "user", "content": user_prompt},
     ]
 
-    best_score = 0.0
+    best_score = 0.001
     best_result = None
     last_content = ""
 
@@ -235,7 +235,7 @@ def run_task(
         action = LitReviewAction(action_type=ActionType.SUBMIT, content=content)
         result = env.step(action)
 
-        score = result.info.get("grading", {}).get("score", 0.0)
+        score = max(0.001, min(0.999, result.info.get("grading", {}).get("score", 0.001)))
 
         if score > best_score:
             best_score = score
@@ -264,7 +264,8 @@ def run_task(
             best_result = result if 'result' in dir() else None
 
     # Pre-Submission Checklist: Exact Structured Logs
-    final_score = best_score
+    # Ensure score is strictly between 0 and 1 as required by OpenEnv
+    final_score = max(0.001, min(0.999, best_score))
     elapsed = time.time() - start_time
 
     print(f"[END] task={task_id} score={final_score} steps={turns_taken}", flush=True)
@@ -273,7 +274,7 @@ def run_task(
         "task_id": task_id,
         "difficulty": difficulty,
         "score": final_score,
-        "reward": best_result.reward if best_result else 0.0,
+        "reward": max(0.001, min(0.999, best_result.reward)) if best_result else 0.001,
         "elapsed_seconds": round(elapsed, 2),
     }
 
@@ -311,7 +312,7 @@ def main():
             r = run_task(env, client, active_model, tid, args.temperature, args.max_turns, args.delay)
             results.append(r)
         except Exception as e:
-            results.append({"task_id": tid, "error": str(e), "score": 0.0})
+            results.append({"task_id": tid, "error": str(e), "score": 0.001})
 
         if i < len(task_ids) - 1:
             time.sleep(args.delay)
